@@ -4,7 +4,14 @@ class Board
 
   def initialize
     @board = Array.new(BOARD_SIZE) { Array.new(BOARD_SIZE) {Tile.new}}
+  end
 
+  def give_coords
+    @board.each_with_index do |row, row_idx|
+      row.each_with_index do |tile, col_idx|
+        tile.coords = [row_idx, col_idx]
+      end
+    end
   end
 
   def seed_bombs
@@ -46,7 +53,7 @@ end
 
 class Tile
 attr_reader :flagged, :revealed
-attr_accessor :bombed
+attr_accessor :bombed, :coords
 
   def initialize
     @bombed = false
@@ -54,6 +61,14 @@ attr_accessor :bombed
     @revealed = false
     @neighbor_bomb_count = 0
     @neighbors = []
+    @coords = nil
+  end
+
+  def update_neighbor_bomb_count
+    unless Tile.bombed
+
+    end
+
   end
 
 end
