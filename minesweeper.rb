@@ -3,7 +3,7 @@ class Board
   BOMB_COUNT = 10
 
   def initialize
-    @board = Array.new(BOARD_SIZE) { Array.new(BOARD_SIZE)}
+    @board = Array.new(BOARD_SIZE) { Array.new(BOARD_SIZE) {Tile.new}}
 
   end
 
@@ -29,3 +29,15 @@ end
 
 board = Board.new
 board.display
+
+class Tile
+
+  def initialize
+    @bombed = nil
+    @flagged = false
+    @revealed = false
+    @neighbor_bomb_count = 0
+    @neighbors = []
+  end
+
+end
