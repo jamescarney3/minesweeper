@@ -161,13 +161,22 @@ attr_accessor :bombed, :coords, :flagged, :revealed, :neighbor_bomb_count
   def receive_coords
   end
 
+  def inspect
+    puts "bombed: #{@bombed}"
+    puts "flagged: #{@flagged}"
+    puts "revealed: #{@revealed}"
+    puts "neighbor bombs: #{@neighbor_bomb_count}"
+    puts "neighbors: #{@neighbors.coords}"
+    puts "coordinates: #{@coords}"
+  end
+
 end
 
 
 class Game
 
-  def initialize
-    @board = Board.new_game_board
+  def initialize(saved_board = nil)
+    @board ||= Board.new_game_board
   end
 
   def take_turn
@@ -176,7 +185,11 @@ class Game
     valid_range = (0...@board.board.count)
     until coord.all?{|pos| valid_range.include?(pos)}
       puts "Which tile? (format: row, column)"
-      coord = gets.chomp.strip.split(",").map(&:to_i)
+      input = gets.chomp
+      if input.downcase.start_with?('q')
+        #call quit method
+      end
+      coord = input.strip.split(",").map(&:to_i)
     end
     until action == :r || action == :f
       puts "Reveal or flag? (r or f)"
@@ -186,7 +199,19 @@ class Game
     [coord, action]
   end
 
+  def quit
+
+  end
+
+  def saved_game?
+    puts "Load saved game? (y/n)"
+    return true if gets.chomp.downcase == 'y'
+    false
+  end
+
   def play
+
+    
     @board.display
 
     until @board.is_won? || @board.lost
@@ -200,4 +225,11 @@ class Game
 
   end
 
+end
+
+
+
+if __FILE__ == $PROGRAM_NAME
+  game = Game.new
+  game.play
 end
