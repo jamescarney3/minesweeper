@@ -1,4 +1,6 @@
 class Board
+  attr_reader :board
+
   BOARD_SIZE = 9
   BOMB_COUNT = 10
 
@@ -26,6 +28,20 @@ class Board
     end
   end
 
+  def self.new_game_board
+    board = Board.new
+    board.give_coords
+    board.seed_bombs
+    board.each do |row|
+      row.each do |tile|
+        tile.find_neighbors
+        tile.update_neighbor_bomb_count
+      end
+    end
+    
+    board
+  end
+
   def display
     @board.each do |row|
       row.each do |col|
@@ -33,10 +49,11 @@ class Board
           print "F"
         elsif col.revealed
           print "_"
-        #elsif col.bombed
-          #print "B"
+        elsif col.bombed
+          print "B"
         else
-          print "*"
+          #print "*"
+          print col.neighbor_bomb_count
         end
       end
 
@@ -52,7 +69,7 @@ end
 #board.display
 
 class Tile
-attr_reader :flagged, :revealed
+attr_reader :flagged, :revealed, :neighbors, :neighbor_bomb_count
 attr_accessor :bombed, :coords
 
   def initialize
@@ -65,11 +82,12 @@ attr_accessor :bombed, :coords
   end
 
   def update_neighbor_bomb_count
-
-
+    neighbors.each do |neighbor|
+      @neighbor_bomb_count += 1 if neighbor.bombed
+    end
   end
 
-  def neighbors(board)
+  def find_neighbors(board)
     neighbor_coordinates = []
     ((coords[0]-1)..(coords[0]+1)).each do |row|
       ((coords[1]-1)..(coords[1]+1)).each do |col|
@@ -78,11 +96,11 @@ attr_accessor :bombed, :coords
     end
 
     neighbor_coordinates.delete_if do |coord|
-      !(0..BOARD_SIZE).include?(coord[0]) || !(0..BOARD_SIZE).include?(coord[1])
+      !(0..board.board.count).include?(coord[0]) || !(0..board.board.count).include?(coord[1])
     end
 
     neighbor_coordinates.each do |coord|
-      @neighbors << board[coord[0]][coord[1]]
+      @neighbors << board.board[coord[0]][coord[1]]
     end
   end
 
