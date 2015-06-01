@@ -1,3 +1,5 @@
+require 'byebug'
+
 class Board
   attr_reader :board
 
@@ -32,13 +34,13 @@ class Board
     board = Board.new
     board.give_coords
     board.seed_bombs
-    board.each do |row|
+    board.board.each do |row|
       row.each do |tile|
-        tile.find_neighbors
+        tile.find_neighbors(board)
         tile.update_neighbor_bomb_count
       end
     end
-    
+
     board
   end
 
@@ -69,8 +71,8 @@ end
 #board.display
 
 class Tile
-attr_reader :flagged, :revealed, :neighbors, :neighbor_bomb_count
-attr_accessor :bombed, :coords
+attr_reader :flagged, :revealed, :neighbors
+attr_accessor :bombed, :coords, :neighbor_bomb_count
 
   def initialize
     @bombed = false
@@ -82,8 +84,8 @@ attr_accessor :bombed, :coords
   end
 
   def update_neighbor_bomb_count
-    neighbors.each do |neighbor|
-      @neighbor_bomb_count += 1 if neighbor.bombed
+    self.neighbors.each do |neighbor|
+      self.neighbor_bomb_count += 1 if neighbor.bombed
     end
   end
 
@@ -96,7 +98,7 @@ attr_accessor :bombed, :coords
     end
 
     neighbor_coordinates.delete_if do |coord|
-      !(0..board.board.count).include?(coord[0]) || !(0..board.board.count).include?(coord[1])
+      !(0...board.board.count).include?(coord[0]) || !(0...board.board.count).include?(coord[1])
     end
 
     neighbor_coordinates.each do |coord|
