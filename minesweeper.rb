@@ -1,13 +1,15 @@
 require 'byebug'
 
 class Board
-  attr_reader :board
+  attr_reader :board, :won, :lost
 
   BOARD_SIZE = 9
   BOMB_COUNT = 10
 
   def initialize
     @board = Array.new(BOARD_SIZE) { Array.new(BOARD_SIZE) {Tile.new}}
+    @won = false
+    @lost = false
   end
 
   def give_coords
@@ -44,18 +46,46 @@ class Board
     board
   end
 
+  def update_board(coord, action)
+
+    case action
+    when :r
+      if @board[coord[0]][coord[1]].bombed
+        @lost = true
+      else
+        @board[coord[0]][coord[1]].reveal_neighbors
+      end
+    when :f
+      if @board[coord[0]][coord[1]].flagged
+        @board[coord[0]][coord[1]].flagged = false
+      else
+        @board[coord[0]][coord[1]].flagged = true
+      end
+    end
+
+  end
+
+  def is_won?
+    @board.each do |row|
+      row.each do |tile|
+        return false if !tile.bombed && !tile.revealed
+      end
+    end
+
+    true
+  end
+
   def display
     @board.each do |row|
-      row.each do |col|
-        if col.flagged
+      row.each do |tile|
+        if tile.flagged
           print "F"
-        elsif col.revealed
-          print "_"
-        elsif col.bombed
-          print "B"
+        elsif tile.revealed
+          print tile.neighbor_bomb_count
+        elsif tile.bombed
+          print "*"
         else
-          #print "*"
-          print col.neighbor_bomb_count
+          print "*"
         end
       end
 
@@ -71,8 +101,8 @@ end
 #board.display
 
 class Tile
-attr_reader :flagged, :revealed, :neighbors
-attr_accessor :bombed, :coords, :neighbor_bomb_count
+attr_reader :neighbors
+attr_accessor :bombed, :coords, :flagged, :revealed, :neighbor_bomb_count
 
   def initialize
     @bombed = false
@@ -106,7 +136,49 @@ attr_accessor :bombed, :coords, :neighbor_bomb_count
     end
   end
 
+  def reveal_neighbors
+    queue = [self]
+    checked = [self]
+    until queue.empty?
+      if queue.first.neighbor_bomb_count == 0
+        neighbors.each do |neighbor|
+          queue << neighbor unless checked.include?(neighbor)
+          checked << neighbor
+        end
+      end
+      queue.shift.revealed = true
+    end
+  end
+
   def receive_coords
+  end
+
+end
+
+
+class Game
+
+  def initialize
+    @board = Board.new_game_board
+  end
+
+  def take_turn
+    puts "Which tile? (format: row, column)"
+    coord = gets.chomp.split(", ").map(&:to_i)
+    puts "Reveal or flag? (r or f)"
+    action = gets.chomp.downcase.to_sym
+
+    [coord, action]
+  end
+
+  def play
+    until @board.won || @board.lost
+      turn_input = take_turn
+      @board.update_board(*turn_input)
+      @board.display
+    end
+
+
   end
 
 end
