@@ -15,17 +15,19 @@ class Board
     end
 
     bomb_coords.each do |bomb_coord|
-      @board[bomb_coord[0]][bomb_coord[1]] = :bomb
+      @board[bomb_coord[0]][bomb_coord[1]].bombed = true
     end
   end
 
   def display
     @board.each do |row|
       row.each do |col|
-        if col.flagged == true
+        if col.flagged
           print "F"
-        elsif col.revealed == true
+        elsif col.revealed
           print "_"
+        #elsif col.bombed
+          #print "B"
         else
           print "*"
         end
@@ -43,10 +45,11 @@ end
 #board.display
 
 class Tile
-attr_reader :bombed, :flagged, :revealed
+attr_reader :flagged, :revealed
+attr_accessor :bombed
 
   def initialize
-    @bombed = nil
+    @bombed = false
     @flagged = false
     @revealed = false
     @neighbor_bomb_count = 0
