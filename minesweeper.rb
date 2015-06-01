@@ -65,10 +65,28 @@ attr_accessor :bombed, :coords
   end
 
   def update_neighbor_bomb_count
-    unless Tile.bombed
 
+
+  end
+
+  def neighbors(board)
+    neighbor_coordinates = []
+    ((coords[0]-1)..(coords[0]+1)).each do |row|
+      ((coords[1]-1)..(coords[1]+1)).each do |col|
+        neighbor_coordinates << [row, col] unless row == coords[0] && col == coords[1]
+      end
     end
 
+    neighbor_coordinates.delete_if do |coord|
+      !(0..BOARD_SIZE).include?(coord[0]) || !(0..BOARD_SIZE).include?(coord[1])
+    end
+
+    neighbor_coordinates.each do |coord|
+      @neighbors << board[coord[0]][coord[1]]
+    end
+  end
+
+  def receive_coords
   end
 
 end
