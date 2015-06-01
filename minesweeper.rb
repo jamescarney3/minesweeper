@@ -86,15 +86,12 @@ class Board
           print "F "
         elsif tile.revealed
           print "#{tile.neighbor_bomb_count > 0 ? tile.neighbor_bomb_count : " "} "
-          #print '*'
         elsif @lost && tile.bombed
           print "B "
         else
           print "* "
-          #print tile.neighbor_bomb_count
         end
       end
-
       puts ""
     end
 
@@ -102,9 +99,6 @@ class Board
   end
 
 end
-
-#board = Board.new
-#board.display
 
 class Tile
 attr_reader :neighbors
@@ -176,29 +170,43 @@ end
 
 class Game
 
-  def initialize(saved_board = nil)
-    @board ||= Board.new_game_board
+  def initialize
+    @board = Board.new_game_board
   end
 
-  def take_turn
+  def get_coords
     coord = [-1,-1]
-    action = nil
     input = nil
     valid_range = (0...@board.board.count)
+
     until coord.all?{|pos| valid_range.include?(pos)} || input == "q"
       puts "Which tile? (format: row, column)"
       input = gets.chomp
+
       if input.downcase.start_with?('q')
         quit
         return nil
       end
       coord = input.strip.split(",").map(&:to_i)
-      until action == :r || action == :f
-        puts "Reveal or flag? (r or f)"
-        action = gets.chomp.downcase.to_sym
-      end
     end
 
+    coord
+  end
+
+  def get_action
+    action = nil
+    until action == :r || action == :f
+      puts "Reveal or flag? (r or f)"
+      action = gets.chomp.downcase.to_sym
+    end
+
+    action
+  end
+
+  def take_turn
+    coord = get_coords
+    return nil if coord.nil?
+    action = get_action
 
     [coord, action]
   end
@@ -209,7 +217,6 @@ class Game
       f.puts save
     end
   end
-
 
   def saved_game?
     puts "Load saved game? (y/n)"
@@ -238,13 +245,8 @@ class Game
     else
       puts (@board.lost ? "You Lost!" : "You Won!")
     end
-
-
   end
-
 end
-
-
 
 if __FILE__ == $PROGRAM_NAME
   game = Game.new
