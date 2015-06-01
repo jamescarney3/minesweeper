@@ -21,16 +21,29 @@ class Board
 
   def display
     @board.each do |row|
-      print row
-      puts ''
+      row.each do |col|
+        if col.flagged == true
+          print "F"
+        elsif col.revealed == true
+          print "_"
+        else
+          print "*"
+        end
+      end
+
+      puts ""
     end
+
+    nil
   end
+
 end
 
-board = Board.new
-board.display
+#board = Board.new
+#board.display
 
 class Tile
+attr_reader :bombed, :flagged, :revealed
 
   def initialize
     @bombed = nil
