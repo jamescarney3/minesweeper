@@ -4,7 +4,7 @@ class Board
   attr_reader :board, :won, :lost
 
   BOARD_SIZE = 9
-  BOMB_COUNT = 10
+  BOMB_COUNT = 2
 
   def initialize
     @board = Array.new(BOARD_SIZE) { Array.new(BOARD_SIZE) {Tile.new}}
@@ -81,11 +81,13 @@ class Board
         if tile.flagged
           print "F"
         elsif tile.revealed
-          print tile.neighbor_bomb_count
+          #print tile.neighbor_bomb_count
+          print '*'
         elsif tile.bombed
-          print "*"
+          print "B"
         else
-          print "*"
+          #print "*"
+          print tile.neighbor_bomb_count
         end
       end
 
@@ -140,10 +142,13 @@ attr_accessor :bombed, :coords, :flagged, :revealed, :neighbor_bomb_count
     queue = [self]
     checked = [self]
     until queue.empty?
+      #debugger
       if queue.first.neighbor_bomb_count == 0
-        neighbors.each do |neighbor|
-          queue << neighbor unless checked.include?(neighbor)
-          checked << neighbor
+        queue.first.neighbors.each do |neighbor|
+          unless checked.include?(neighbor)
+            queue << neighbor
+            checked << neighbor
+          end
         end
       end
       queue.shift.revealed = true
@@ -172,11 +177,15 @@ class Game
   end
 
   def play
-    until @board.won || @board.lost
+    @board.display
+
+    until @board.is_won? || @board.lost
       turn_input = take_turn
       @board.update_board(*turn_input)
       @board.display
     end
+
+    puts (@board.lost ? "You Lost!" : "You Won!")
 
 
   end
