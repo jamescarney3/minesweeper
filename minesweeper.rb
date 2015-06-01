@@ -4,7 +4,7 @@ class Board
   attr_reader :board, :won, :lost
 
   BOARD_SIZE = 9
-  BOMB_COUNT = 2
+  BOMB_COUNT = 10
 
   def initialize
     @board = Array.new(BOARD_SIZE) { Array.new(BOARD_SIZE) {Tile.new}}
@@ -76,18 +76,21 @@ class Board
   end
 
   def display
-    @board.each do |row|
+    puts "   0 1 2 3 4 5 6 7 8"
+    puts '--------------------'
+    @board.each_with_index do |row, idx|
+      print "#{idx}| "
       row.each do |tile|
         if tile.flagged
-          print "F"
+          print "F "
         elsif tile.revealed
-          #print tile.neighbor_bomb_count
-          print '*'
-        elsif tile.bombed
-          print "B"
+          print "#{tile.neighbor_bomb_count > 0 ? tile.neighbor_bomb_count : " "} "
+          #print '*'
+        elsif @lost && tile.bombed
+          print "B "
         else
-          #print "*"
-          print tile.neighbor_bomb_count
+          print "* "
+          #print tile.neighbor_bomb_count
         end
       end
 
@@ -168,10 +171,17 @@ class Game
   end
 
   def take_turn
-    puts "Which tile? (format: row, column)"
-    coord = gets.chomp.split(", ").map(&:to_i)
-    puts "Reveal or flag? (r or f)"
-    action = gets.chomp.downcase.to_sym
+    coord = [-1,-1]
+    action = nil
+    valid_range = (0...@board.board.count)
+    until coord.all?{|pos| valid_range.include?(pos)}
+      puts "Which tile? (format: row, column)"
+      coord = gets.chomp.strip.split(",").map(&:to_i)
+    end
+    until action == :r || action == :f
+      puts "Reveal or flag? (r or f)"
+      action = gets.chomp.downcase.to_sym
+    end
 
     [coord, action]
   end
