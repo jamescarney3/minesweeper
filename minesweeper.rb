@@ -1,4 +1,5 @@
 require 'byebug'
+require 'yaml'
 
 class Board
   attr_reader :board, :won, :lost
@@ -182,26 +183,33 @@ class Game
   def take_turn
     coord = [-1,-1]
     action = nil
+    input = nil
     valid_range = (0...@board.board.count)
-    until coord.all?{|pos| valid_range.include?(pos)}
+    until coord.all?{|pos| valid_range.include?(pos)} || input == "q"
       puts "Which tile? (format: row, column)"
       input = gets.chomp
       if input.downcase.start_with?('q')
-        #call quit method
+        quit
+        return nil
       end
       coord = input.strip.split(",").map(&:to_i)
+      until action == :r || action == :f
+        puts "Reveal or flag? (r or f)"
+        action = gets.chomp.downcase.to_sym
+      end
     end
-    until action == :r || action == :f
-      puts "Reveal or flag? (r or f)"
-      action = gets.chomp.downcase.to_sym
-    end
+
 
     [coord, action]
   end
 
   def quit
-
+    save = @board.to_yaml
+    File.open("savegame.yaml", "w") do |f|
+      f.puts save
+    end
   end
+
 
   def saved_game?
     puts "Load saved game? (y/n)"
@@ -211,16 +219,25 @@ class Game
 
   def play
 
-    
-    @board.display
+    if saved_game?
+        saved_board = File.read('savegame.yaml')
+        @board = YAML.load(saved_board)
+    end
 
-    until @board.is_won? || @board.lost
+    @board.display
+    turn_input = true
+    until @board.is_won? || @board.lost || turn_input.nil?
       turn_input = take_turn
+      break if turn_input.nil?
       @board.update_board(*turn_input)
       @board.display
     end
 
-    puts (@board.lost ? "You Lost!" : "You Won!")
+    if turn_input.nil?
+      puts "Game saved"
+    else
+      puts (@board.lost ? "You Lost!" : "You Won!")
+    end
 
 
   end
